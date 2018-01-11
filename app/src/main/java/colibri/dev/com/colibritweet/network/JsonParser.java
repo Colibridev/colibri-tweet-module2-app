@@ -3,6 +3,9 @@ package colibri.dev.com.colibritweet.network;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,36 +15,18 @@ import colibri.dev.com.colibritweet.pojo.User;
 
 public class JsonParser {
 
-    public Collection<User> getUsers(String response) throws JSONException {
-        JSONArray jsonArray = new JSONArray(response);
-        Collection<User> usersResult = new ArrayList<>();
+    private final Gson gson;
 
-        for(int i = 0; i < jsonArray.length(); i++) {
-            JSONObject userJson = jsonArray.getJSONObject(i);
-            User user = getUser(userJson);
-            usersResult.add(user);
-        }
-
-        return usersResult;
-
+    public JsonParser() {
+        gson = new Gson();
     }
 
-    public User getUser(String response) throws JSONException {
-        JSONObject userJson = new JSONObject(response);
-        return getUser(userJson);
+    public Collection<User> getUsers(String response) {
+        return gson.fromJson(response, new TypeToken<Collection<User>>(){}.getType());
     }
 
-    private User getUser(JSONObject userJson) throws JSONException {
-        long id = userJson.getLong("id");
-        String name = userJson.getString("name");
-        String nick = userJson.getString("screen_name");
-        String location = userJson.getString("location");
-        String description = userJson.getString("description");
-        String imageUrl = userJson.getString("profile_image_url");
-        int followersCount = userJson.getInt("followers_count");
-        int followingCount = userJson.getInt("favourites_count");
-
-        return new User(id, imageUrl, name, nick, description, location, followingCount, followersCount);
+    public User getUser(String response) {
+        return gson.fromJson(response, User.class);
     }
 
     public Collection<Tweet> getTweets(String response) throws JSONException {
@@ -59,7 +44,7 @@ public class JsonParser {
             String imageUrl = getTweetImageUrl(tweetJson);
 
             JSONObject userJson = tweetJson.getJSONObject("user");
-            User user = getUser(userJson);
+            User user = getUser(userJson.toString());
 
             Tweet tweet = new Tweet(user, id, creationDate, fullText, retweetCount, likesCount, imageUrl);
             tweetsResult.add(tweet);

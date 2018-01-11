@@ -1,14 +1,16 @@
 package colibri.dev.com.colibritweet.pojo;
 
+import com.google.gson.annotations.SerializedName;
+
 public class User {
-    private long id;
-    private String imageUrl;
-    private String name;
-    private String nick;
-    private String description;
-    private String location;
-    private int followingCount;
-    private int followersCount;
+    @SerializedName("id") private long id;
+    @SerializedName("profile_image_url") private String imageUrl;
+    @SerializedName("name") private String name;
+    @SerializedName("screen_name") private String nick;
+    @SerializedName("description") private String description;
+    @SerializedName("location") private String location;
+    @SerializedName("favourites_count") private int followingCount;
+    @SerializedName("followers_count") private int followersCount;
 
     public User(long id,
                 String imageUrl,
