@@ -15,4 +15,7 @@
     <string name="fa_retweet">\uf079</string>
 
     <string name="ion_search"></string>
+
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">uRJ8JebdrBVByRIUQoJgXOEOu</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">O7V535sxWcXPRXG9PFwg6y54c3T1t83oLbXTq0EVrRsrBoa4PL</string>
 </resources>

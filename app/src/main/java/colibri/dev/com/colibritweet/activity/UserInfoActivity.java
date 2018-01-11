@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -41,6 +42,9 @@ public class UserInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_info);
+
+        long userId = getIntent().getLongExtra(USER_ID, -1);
+        Toast.makeText(this, "UserId = " + userId, Toast.LENGTH_SHORT).show();
 
         userImageView = findViewById(R.id.user_image_view);
         nameTextView = findViewById(R.id.user_name_text_view);
