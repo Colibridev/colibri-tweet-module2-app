@@ -63,12 +63,9 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             nameTextView = itemView.findViewById(R.id.user_name_text_view);
             nickTextView = itemView.findViewById(R.id.user_nick_text_view);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    User user = userList.get(getLayoutPosition());
-                    onUserClickListener.onUserClick(user);
-                }
+            itemView.setOnClickListener(v -> {
+                User user = userList.get(getLayoutPosition());
+                onUserClickListener.onUserClick(user);
             });
         }
 

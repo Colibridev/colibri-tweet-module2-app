@@ -73,13 +73,10 @@ public class UserInfoActivity extends AppCompatActivity {
         httpClient = new HttpClient();
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                tweetAdapter.clearItems();
-                loadUserInfo(userId);
-                loadTweets(userId);
-            }
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            tweetAdapter.clearItems();
+            loadUserInfo(userId);
+            loadTweets(userId);
         });
 
         loadUserInfo(userId);

@@ -49,22 +49,14 @@ public class SearchUsersActivity extends AppCompatActivity {
         queryEditText = toolbar.findViewById(R.id.query_edit_text);
         searchButton = toolbar.findViewById(R.id.search_button);
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchUsers();
-            }
-        });
+        searchButton.setOnClickListener(v -> searchUsers());
 
-        queryEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    searchUsers();
-                    return true;
-                }
-                return false;
+        queryEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchUsers();
+                return true;
             }
+            return false;
         });
 
         setSupportActionBar(toolbar);
@@ -73,12 +65,7 @@ public class SearchUsersActivity extends AppCompatActivity {
         httpClient = new HttpClient();
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                searchUsers();
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(this::searchUsers);
     }
 
     @Override
@@ -97,13 +84,10 @@ public class SearchUsersActivity extends AppCompatActivity {
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         usersRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        UsersAdapter.OnUserClickListener onUserClickListener = new UsersAdapter.OnUserClickListener() {
-            @Override
-            public void onUserClick(User user) {
-                Intent intent = new Intent(SearchUsersActivity.this, UserInfoActivity.class);
-                intent.putExtra(UserInfoActivity.USER_ID, user.getId());
-                startActivity(intent);
-            }
+        UsersAdapter.OnUserClickListener onUserClickListener = user -> {
+            Intent intent = new Intent(SearchUsersActivity.this, UserInfoActivity.class);
+            intent.putExtra(UserInfoActivity.USER_ID, user.getId());
+            startActivity(intent);
         };
         usersAdapter = new UsersAdapter(onUserClickListener);
         usersRecyclerView.setAdapter(usersAdapter);
