@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -112,22 +114,28 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void loadUserInfo(final long userId) {
+        // передаём userId в метод execute
+        new UserInfoAsyncTask().execute(userId);
+    }
 
-        // создаём объект Runnable
-        Runnable readUserRunnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String userInfo = httpClient.readUserInfo(userId);
-                    Log.d("HttpTest", userInfo);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    @SuppressLint("StaticFieldLeak")
+    private class UserInfoAsyncTask extends AsyncTask<Long, Integer, String> {
+
+        protected String doInBackground(Long... ids) {
+            try {
+                // достаём userId, который передали в метод execute
+                Long userId = ids[0];
+                return httpClient.readUserInfo(userId);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
             }
-        };
+        }
 
-        // Запускаем runnable в новом потоке
-        new Thread(readUserRunnable).start();
+        protected void onPostExecute(String result) {
+            Log.d("HttpTest", result);
+        }
     }
 
     private void displayUserInfo(User user) {
