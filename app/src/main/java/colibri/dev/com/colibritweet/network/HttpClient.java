@@ -12,11 +12,20 @@ import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.internal.oauth.OAuth1aHeaders;
 
+import org.json.JSONException;
+
+import colibri.dev.com.colibritweet.pojo.User;
+
 public class HttpClient {
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String GET = "GET";
+    private final JsonParser jsonParser;
 
-    public String readUserInfo(long userId) throws IOException {
+    public HttpClient(){
+        jsonParser = new JsonParser();
+    }
+
+    public User readUserInfo(long userId) throws IOException, JSONException {
         String requestUrl = "https://api.twitter.com/1.1/users/show.json?user_id=" + userId;
 
         URL url = new URL(requestUrl);
@@ -37,8 +46,9 @@ public class HttpClient {
         }
 
         String response = convertStreamToString(in);
+        User user = jsonParser.getUser(response);
 
-        return response;
+        return user;
     }
 
     private String convertStreamToString(InputStream stream) throws IOException {

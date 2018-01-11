@@ -41,7 +41,7 @@ public class User {
     }
 
     public String getNick() {
-        return nick;
+        return "@" + nick;
     }
 
     public String getDescription() {

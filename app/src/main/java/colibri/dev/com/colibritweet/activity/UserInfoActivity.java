@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -20,6 +19,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
 
 import colibri.dev.com.colibritweet.R;
 import colibri.dev.com.colibritweet.adapter.TweetAdapter;
@@ -114,27 +115,25 @@ public class UserInfoActivity extends AppCompatActivity {
     }
 
     private void loadUserInfo(final long userId) {
-        // передаём userId в метод execute
         new UserInfoAsyncTask().execute(userId);
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class UserInfoAsyncTask extends AsyncTask<Long, Integer, String> {
+    private class UserInfoAsyncTask extends AsyncTask<Long, Integer, User> {
 
-        protected String doInBackground(Long... ids) {
+        protected User doInBackground(Long... ids) {
             try {
-                // достаём userId, который передали в метод execute
                 Long userId = ids[0];
                 return httpClient.readUserInfo(userId);
 
-            } catch (IOException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
                 return null;
             }
         }
 
-        protected void onPostExecute(String result) {
-            Log.d("HttpTest", result);
+        protected void onPostExecute(User user) {
+            displayUserInfo(user);
         }
     }
 
