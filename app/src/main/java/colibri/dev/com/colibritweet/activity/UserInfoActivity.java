@@ -1,7 +1,6 @@
 package colibri.dev.com.colibritweet.activity;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 
 import android.annotation.SuppressLint;
@@ -16,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -52,7 +50,6 @@ public class UserInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_info);
 
         long userId = getIntent().getLongExtra(USER_ID, -1);
-        Toast.makeText(this, "UserId = " + userId, Toast.LENGTH_SHORT).show();
 
         userImageView = findViewById(R.id.user_image_view);
         nameTextView = findViewById(R.id.user_name_text_view);
@@ -68,7 +65,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
         httpClient = new HttpClient();
         loadUserInfo(userId);
-        loadTweets();
+        loadTweets(userId);
     }
 
     @Override
@@ -86,25 +83,28 @@ public class UserInfoActivity extends AppCompatActivity {
         return true;
     }
 
-    private void loadTweets() {
-        Collection<Tweet> tweets = getTweets();
-        tweetAdapter.setItems(tweets);
+
+    private void loadTweets(long userId) {
+        new TweetsAsyncTask().execute(userId);
     }
 
-    private Collection<Tweet> getTweets() {
-        return Arrays.asList(
-                new Tweet(getUser(), 1L, "Thu Dec 13 07:31:08 +0000 2017",
-                        "Очень длинное описание твита 1",
-                        4L, 4L, "https://www.w3schools.com/w3css/img_fjords.jpg"),
+    @SuppressLint("StaticFieldLeak")
+    private class TweetsAsyncTask extends AsyncTask<Long, Integer, Collection<Tweet>> {
 
-                new Tweet(getUser(), 2L, "Thu Dec 12 07:31:08 +0000 2017",
-                        "Очень длинное описание твита 2",
-                        5L, 5L, "https://www.w3schools.com/w3images/lights.jpg"),
+        protected Collection<Tweet> doInBackground(Long... ids) {
+            try {
+                Long userId = ids[0];
+                return httpClient.readTweets(userId);
 
-                new Tweet(getUser(), 3L, "Thu Dec 11 07:31:08 +0000 2017",
-                        "Очень длинное описание твита 3",
-                        6L, 6L, "https://www.w3schools.com/css/img_mountains.jpg")
-        );
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        protected void onPostExecute(Collection<Tweet> tweets) {
+            tweetAdapter.setItems(tweets);
+        }
     }
 
     private void initRecyclerView() {
@@ -151,18 +151,5 @@ public class UserInfoActivity extends AppCompatActivity {
         followersCountTextView.setText(followersCount);
 
         getSupportActionBar().setTitle(user.getName());
-    }
-
-    private User getUser() {
-        return new User(
-                1L,
-                "http://i.imgur.com/DvpvklR.png",
-                "DevColibri",
-                "devcolibri",
-                "Sample description",
-                "USA",
-                42,
-                42
-        );
     }
 }
