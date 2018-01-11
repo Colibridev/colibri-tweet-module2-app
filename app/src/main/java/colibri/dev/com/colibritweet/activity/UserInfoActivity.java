@@ -7,7 +7,10 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -45,12 +48,15 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private HttpClient httpClient;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_info);
 
-        long userId = getIntent().getLongExtra(USER_ID, -1);
+        final long userId = getIntent().getLongExtra(USER_ID, -1);
 
         userImageView = findViewById(R.id.user_image_view);
         nameTextView = findViewById(R.id.user_name_text_view);
@@ -65,6 +71,17 @@ public class UserInfoActivity extends AppCompatActivity {
         initRecyclerView();
 
         httpClient = new HttpClient();
+
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                tweetAdapter.clearItems();
+                loadUserInfo(userId);
+                loadTweets(userId);
+            }
+        });
+
         loadUserInfo(userId);
         loadTweets(userId);
     }
@@ -92,6 +109,12 @@ public class UserInfoActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     private class TweetsAsyncTask extends AsyncTask<Long, Integer, Collection<Tweet>> {
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            swipeRefreshLayout.setRefreshing(true);
+        }
+
         protected Collection<Tweet> doInBackground(Long... ids) {
             try {
                 Long userId = ids[0];
@@ -104,6 +127,8 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Collection<Tweet> tweets) {
+            swipeRefreshLayout.setRefreshing(false);
+
             // успешный ответ
             if(tweets != null) {
                 tweetAdapter.setItems(tweets);
@@ -117,6 +142,10 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
         tweetsRecyclerView = findViewById(R.id.tweets_recycler_view);
+
+        ViewCompat.setNestedScrollingEnabled(tweetsRecyclerView, false);
+        tweetsRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
         tweetsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tweetAdapter = new TweetAdapter();
         tweetsRecyclerView.setAdapter(tweetAdapter);
@@ -128,6 +157,13 @@ public class UserInfoActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private class UserInfoAsyncTask extends AsyncTask<Long, Integer, User> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            swipeRefreshLayout.setRefreshing(true);
+        }
+
         protected User doInBackground(Long... ids) {
             try {
                 Long userId = ids[0];
@@ -140,6 +176,9 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(User user) {
+            swipeRefreshLayout.setRefreshing(false);
+
+            // успешный ответ
             if(user != null) {
                 displayUserInfo(user);
             }
