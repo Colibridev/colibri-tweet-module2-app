@@ -1,5 +1,6 @@
 package colibri.dev.com.colibritweet.activity;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -19,6 +21,7 @@ import com.squareup.picasso.Picasso;
 
 import colibri.dev.com.colibritweet.R;
 import colibri.dev.com.colibritweet.adapter.TweetAdapter;
+import colibri.dev.com.colibritweet.network.HttpClient;
 import colibri.dev.com.colibritweet.pojo.Tweet;
 import colibri.dev.com.colibritweet.pojo.User;
 
@@ -37,6 +40,8 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private RecyclerView tweetsRecyclerView;
     private TweetAdapter tweetAdapter;
+
+    private HttpClient httpClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +63,8 @@ public class UserInfoActivity extends AppCompatActivity {
 
         initRecyclerView();
 
-        loadUserInfo();
+        httpClient = new HttpClient();
+        loadUserInfo(userId);
         loadTweets();
     }
 
@@ -70,7 +76,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_search) {
+        if (item.getItemId() == R.id.action_search) {
             Intent intent = new Intent(this, SearchUsersActivity.class);
             startActivity(intent);
         }
@@ -84,13 +90,16 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private Collection<Tweet> getTweets() {
         return Arrays.asList(
-                new Tweet(getUser(), 1L, "Thu Dec 13 07:31:08 +0000 2017", "Очень длинное описание твита 1",
+                new Tweet(getUser(), 1L, "Thu Dec 13 07:31:08 +0000 2017",
+                        "Очень длинное описание твита 1",
                         4L, 4L, "https://www.w3schools.com/w3css/img_fjords.jpg"),
 
-                new Tweet(getUser(), 2L, "Thu Dec 12 07:31:08 +0000 2017", "Очень длинное описание твита 2",
+                new Tweet(getUser(), 2L, "Thu Dec 12 07:31:08 +0000 2017",
+                        "Очень длинное описание твита 2",
                         5L, 5L, "https://www.w3schools.com/w3images/lights.jpg"),
 
-                new Tweet(getUser(), 3L, "Thu Dec 11 07:31:08 +0000 2017", "Очень длинное описание твита 3",
+                new Tweet(getUser(), 3L, "Thu Dec 11 07:31:08 +0000 2017",
+                        "Очень длинное описание твита 3",
                         6L, 6L, "https://www.w3schools.com/css/img_mountains.jpg")
         );
     }
@@ -102,9 +111,23 @@ public class UserInfoActivity extends AppCompatActivity {
         tweetsRecyclerView.setAdapter(tweetAdapter);
     }
 
-    private void loadUserInfo() {
-        User user = getUser();
-        displayUserInfo(user);
+    private void loadUserInfo(final long userId) {
+
+        // создаём объект Runnable
+        Runnable readUserRunnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String userInfo = httpClient.readUserInfo(userId);
+                    Log.d("HttpTest", userInfo);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        // Запускаем runnable в новом потоке
+        new Thread(readUserRunnable).start();
     }
 
     private void displayUserInfo(User user) {
