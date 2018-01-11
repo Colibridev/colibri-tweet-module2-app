@@ -1,9 +1,12 @@
 package colibri.dev.com.colibritweet.activity;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,9 +19,13 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
 
 import colibri.dev.com.colibritweet.R;
 import colibri.dev.com.colibritweet.adapter.UsersAdapter;
+import colibri.dev.com.colibritweet.network.HttpClient;
 import colibri.dev.com.colibritweet.pojo.User;
 
 public class SearchUsersActivity extends AppCompatActivity {
@@ -27,6 +34,8 @@ public class SearchUsersActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private EditText queryEditText;
     private Button searchButton;
+
+    private HttpClient httpClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +67,8 @@ public class SearchUsersActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        httpClient = new HttpClient();
     }
 
     @Override
@@ -87,35 +98,33 @@ public class SearchUsersActivity extends AppCompatActivity {
         usersRecyclerView.setAdapter(usersAdapter);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void searchUsers() {
-        Collection<User> users = getUsers();
-        usersAdapter.clearItems();
-        usersAdapter.setItems(users);
+        final String query = queryEditText.getText().toString();
+        if(query.length() == 0) {
+            Toast.makeText(SearchUsersActivity.this, R.string.not_enough_symbols_msg, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new UsersAsyncTask().execute(query);
     }
 
-    private Collection<User> getUsers() {
-        return Arrays.asList(
-                new User(
-                        929257819349700608L,
-                        "http://i.imgur.com/DvpvklR.png",
-                        "DevColibri",
-                        "@devcolibri",
-                        "Sample description",
-                        "USA",
-                        42,
-                        42
-                ),
+    @SuppressLint("StaticFieldLeak")
+    private class UsersAsyncTask extends AsyncTask<String, Integer, Collection<User>> {
+        @Override
+        protected Collection<User> doInBackground(String... params) {
+            String query = params[0];
+            try {
+                return httpClient.readUsers(query);
+            } catch (IOException | JSONException e) {
+                return null;
+            }
+        }
 
-                new User(
-                        44196397L,
-                        "https://pbs.twimg.com/profile_images/782474226020200448/zDo-gAo0_400x400.jpg",
-                        "Elon Musk",
-                        "@elonmusk",
-                        "Hat Salesman",
-                        "Boring",
-                        14,
-                        13
-                )
-        );
+        @Override
+        protected void onPostExecute(Collection<User> users) {
+            usersAdapter.clearItems();
+            usersAdapter.setItems(users);
+        }
     }
 }

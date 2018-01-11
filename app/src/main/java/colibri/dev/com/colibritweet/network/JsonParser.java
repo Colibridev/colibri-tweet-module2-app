@@ -12,6 +12,20 @@ import colibri.dev.com.colibritweet.pojo.User;
 
 public class JsonParser {
 
+    public Collection<User> getUsers(String response) throws JSONException {
+        JSONArray jsonArray = new JSONArray(response);
+        Collection<User> usersResult = new ArrayList<>();
+
+        for(int i = 0; i < jsonArray.length(); i++) {
+            JSONObject userJson = jsonArray.getJSONObject(i);
+            User user = getUser(userJson);
+            usersResult.add(user);
+        }
+
+        return usersResult;
+
+    }
+
     public User getUser(String response) throws JSONException {
         JSONObject userJson = new JSONObject(response);
         return getUser(userJson);

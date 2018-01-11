@@ -29,6 +29,13 @@ public class HttpClient {
         jsonParser = new JsonParser();
     }
 
+    public Collection<User> readUsers(String query) throws IOException, JSONException {
+        String requestUrl = "https://api.twitter.com/1.1/users/search.json?q=" + query;
+        String encodedUrl = requestUrl.replaceAll(" ", "%20");
+        String response = getResponse(encodedUrl);
+        Collection<User> users = jsonParser.getUsers(response);
+        return users;
+    }
 
     public Collection<Tweet> readTweets(long userId) throws IOException, JSONException {
         String requestUrl = "https://api.twitter.com/1.1/statuses/user_timeline.json?user_id=" + userId + EXTENDED_MODE;
