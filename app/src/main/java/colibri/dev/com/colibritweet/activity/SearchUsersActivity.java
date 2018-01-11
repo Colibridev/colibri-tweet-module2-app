@@ -1,7 +1,6 @@
 package colibri.dev.com.colibritweet.activity;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 
 import android.annotation.SuppressLint;
@@ -111,6 +110,7 @@ public class SearchUsersActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private class UsersAsyncTask extends AsyncTask<String, Integer, Collection<User>> {
+
         @Override
         protected Collection<User> doInBackground(String... params) {
             String query = params[0];
@@ -123,8 +123,16 @@ public class SearchUsersActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Collection<User> users) {
-            usersAdapter.clearItems();
-            usersAdapter.setItems(users);
+            // успешный ответ
+            if (users != null) {
+                usersAdapter.clearItems();
+                usersAdapter.setItems(users);
+            }
+            // ошибка
+            else {
+                Toast.makeText(SearchUsersActivity.this, R.string.loading_error_msg,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

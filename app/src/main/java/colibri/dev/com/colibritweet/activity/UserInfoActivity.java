@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -103,7 +104,14 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Collection<Tweet> tweets) {
-            tweetAdapter.setItems(tweets);
+            // успешный ответ
+            if(tweets != null) {
+                tweetAdapter.setItems(tweets);
+            }
+            // ошибка
+            else {
+                Toast.makeText(UserInfoActivity.this, R.string.loading_error_msg, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -120,7 +128,6 @@ public class UserInfoActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private class UserInfoAsyncTask extends AsyncTask<Long, Integer, User> {
-
         protected User doInBackground(Long... ids) {
             try {
                 Long userId = ids[0];
@@ -133,7 +140,13 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(User user) {
-            displayUserInfo(user);
+            if(user != null) {
+                displayUserInfo(user);
+            }
+            // ошибка
+            else {
+                Toast.makeText(UserInfoActivity.this, R.string.loading_error_msg, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
