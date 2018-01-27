@@ -1,10 +1,11 @@
 package colibri.dev.com.colibritweet.network;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,19 +15,15 @@ import colibri.dev.com.colibritweet.pojo.Tweet;
 import colibri.dev.com.colibritweet.pojo.User;
 
 public class JsonParser {
-
-    private final Gson gson;
-
-    public JsonParser() {
-        gson = new Gson();
-    }
+    private static final Gson GSON = new Gson();
 
     public Collection<User> getUsers(String response) {
-        return gson.fromJson(response, new TypeToken<Collection<User>>(){}.getType());
+        Type usersType = new TypeToken<Collection<User>>(){}.getType();
+        return GSON.fromJson(response, usersType);
     }
 
     public User getUser(String response) {
-        return gson.fromJson(response, User.class);
+        return GSON.fromJson(response, User.class);
     }
 
     public Collection<Tweet> getTweets(String response) throws JSONException {
