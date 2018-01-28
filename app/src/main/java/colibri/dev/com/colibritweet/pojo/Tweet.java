@@ -11,17 +11,6 @@ public class Tweet {
     @SerializedName("favorite_count") private Long favouriteCount;
     private String imageUrl;
 
-    public Tweet(User user, Long id, String creationDate, String text,
-                 Long retweetCount, Long favouriteCount, String imageUrl) {
-        this.user = user;
-        this.id = id;
-        this.creationDate = creationDate;
-        this.text = text;
-        this.retweetCount = retweetCount;
-        this.favouriteCount = favouriteCount;
-        this.imageUrl = imageUrl;
-    }
-
     public User getUser() {
         return user;
     }
