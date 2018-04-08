@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -45,11 +44,11 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private RecyclerView tweetsRecyclerView;
     private TweetAdapter tweetAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private HttpClient httpClient;
 
-    private SwipeRefreshLayout swipeRefreshLayout;
-
+    private int taskInProgressCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +66,6 @@ public class UserInfoActivity extends AppCompatActivity {
         followersCountTextView = findViewById(R.id.followers_count_text_view);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        initRecyclerView();
-
-        httpClient = new HttpClient();
-
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             tweetAdapter.clearItems();
@@ -79,8 +73,21 @@ public class UserInfoActivity extends AppCompatActivity {
             loadTweets(userId);
         });
 
+        initRecyclerView();
+
+        httpClient = new HttpClient();
         loadUserInfo(userId);
         loadTweets(userId);
+    }
+
+    private void setRefreshLayoutVisible(boolean visible) {
+        if(visible) {
+            taskInProgressCount++;
+            if(taskInProgressCount == 1) swipeRefreshLayout.setRefreshing(true);
+        } else {
+            taskInProgressCount--;
+            if(taskInProgressCount == 0) swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     @Override
@@ -108,8 +115,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
-            swipeRefreshLayout.setRefreshing(true);
+            setRefreshLayoutVisible(true);
         }
 
         protected Collection<Tweet> doInBackground(Long... ids) {
@@ -124,7 +130,7 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Collection<Tweet> tweets) {
-            swipeRefreshLayout.setRefreshing(false);
+            setRefreshLayoutVisible(false);
 
             // успешный ответ
             if(tweets != null) {
@@ -139,9 +145,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
         tweetsRecyclerView = findViewById(R.id.tweets_recycler_view);
-
         ViewCompat.setNestedScrollingEnabled(tweetsRecyclerView, false);
-        tweetsRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         tweetsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tweetAdapter = new TweetAdapter();
@@ -157,8 +161,7 @@ public class UserInfoActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
-            swipeRefreshLayout.setRefreshing(true);
+            setRefreshLayoutVisible(true);
         }
 
         protected User doInBackground(Long... ids) {
@@ -173,7 +176,7 @@ public class UserInfoActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(User user) {
-            swipeRefreshLayout.setRefreshing(false);
+            setRefreshLayoutVisible(false);
 
             // успешный ответ
             if(user != null) {
