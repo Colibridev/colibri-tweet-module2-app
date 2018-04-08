@@ -12,24 +12,6 @@ public class User {
     @SerializedName("favourites_count") private int followingCount;
     @SerializedName("followers_count") private int followersCount;
 
-    public User(long id,
-                String imageUrl,
-                String name,
-                String nick,
-                String description,
-                String location,
-                int followingCount,
-                int followersCount) {
-        this.id = id;
-        this.imageUrl = imageUrl;
-        this.name = name;
-        this.nick = nick;
-        this.description = description;
-        this.location = location;
-        this.followingCount = followingCount;
-        this.followersCount = followersCount;
-    }
-
     public long getId() {
         return id;
     }
